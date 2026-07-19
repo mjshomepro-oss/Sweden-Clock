@@ -128,40 +128,6 @@
     margin: 0;
   }
 
-  .compare-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-  }
-
-  .compare-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--ink-dim);
-  }
-
-  .compare-time {
-    font-size: 1.05rem;
-    font-weight: 600;
-    font-variant-numeric: tabular-nums;
-    color: var(--ink);
-  }
-
-  .offset-pill {
-    align-self: flex-start;
-    font-size: 0.74rem;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    color: var(--accent-ink);
-    background: var(--accent);
-    padding: 3px 10px;
-    border-radius: 999px;
-    font-variant-numeric: tabular-nums;
-  }
-
   .trip-header {
     display: flex;
     align-items: baseline;
@@ -290,18 +256,8 @@
   <hr class="divider" />
 
   <div>
-    <div class="compare-row">
-      <span class="compare-label" id="homeLabel">Your time</span>
-      <span class="compare-time" id="homeClock">--:--</span>
-    </div>
-    <div class="offset-pill" id="offsetPill" style="margin-top:8px;">—</div>
-  </div>
-
-  <hr class="divider" />
-
-  <div>
     <div class="trip-header" style="margin-bottom:12px;">
-      <span class="trip-label">IFK Maryland · Sweden Tour</span>
+      <span class="trip-label">IFK Maryland · Sweden Tournament</span>
       <span class="trip-day" id="tripDay">Day — of 11</span>
     </div>
 
@@ -327,10 +283,9 @@
 <script>
   var STOCKHOLM_TZ = "Europe/Stockholm";
   var TRIP_DAYS = 11; // Jul 19 - Jul 29, 2026
-  var homeTz = Intl.DateTimeFormat().resolvedOptions().timeZone || STOCKHOLM_TZ;
 
-  // Times below come straight off the tour itinerary. Each is stored as its own
-  // local wall-clock time converted to UTC, since the tour crosses three zones:
+  // Times below come straight off the tournament itinerary. Each is stored as its own
+  // local wall-clock time converted to UTC, since the trip crosses three zones:
   // ET = Washington Dulles, IS = Reykjavik (no DST), SE = Stockholm/Umea (CEST).
   var EVENTS = [
     { day: 1, start: "2026-07-20T00:20:00Z", when: "8:20 PM ET", cat: "TRAVEL",
@@ -451,27 +406,11 @@
     segEls.push(s);
   }
 
-  function offsetMinutes(date, tz) {
-    var f = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "shortOffset" });
-    var part = f.formatToParts(date).find(function (p) { return p.type === "timeZoneName"; });
-    var m = part && part.value.match(/GMT([+-]\d+)(?::(\d+))?/);
-    if (!m) return 0;
-    var h = parseInt(m[1], 10);
-    var mins = m[2] ? parseInt(m[2], 10) : 0;
-    return h * 60 + (h < 0 ? -mins : mins);
-  }
-
   function zoneAbbrev(date, tz) {
     var f = new Intl.DateTimeFormat("en-US", { timeZone: tz, timeZoneName: "short" });
     var part = f.formatToParts(date).find(function (p) { return p.type === "timeZoneName"; });
     return part ? part.value : tz;
   }
-
-  function cityLabel(tz) {
-    var last = tz.split("/").pop() || tz;
-    return last.replace(/_/g, " ");
-  }
-  document.getElementById("homeLabel").textContent = cityLabel(homeTz) + " time";
 
   var CAT_LABEL = {
     TRAVEL: "TRAVEL", MEAL: "MEAL", TRAINING: "TRAINING", MATCH: "MATCH DAY",
@@ -508,7 +447,7 @@
     }
 
     if (!current) {
-      tag.textContent = "TOUR STARTS SOON";
+      tag.textContent = "TOURNAMENT STARTS SOON";
       tag.className = "now-tag";
       title.textContent = "Not departed yet";
       sub.textContent = "First stop: " + next.title + " · " + next.when;
@@ -567,23 +506,6 @@
     }).format(now);
 
     document.getElementById("zoneAbbr").textContent = zoneAbbrev(now, STOCKHOLM_TZ);
-
-    var homeTime = new Intl.DateTimeFormat("en-US", {
-      timeZone: homeTz, hour: "numeric", minute: "2-digit", hour12: true
-    }).format(now);
-    document.getElementById("homeClock").textContent = homeTime;
-
-    var diffMin = offsetMinutes(now, STOCKHOLM_TZ) - offsetMinutes(now, homeTz);
-    var diffH = diffMin / 60;
-    var pill = document.getElementById("offsetPill");
-    if (diffH === 0) {
-      pill.textContent = "Same time as you";
-    } else {
-      var whole = Math.trunc(diffH);
-      var frac = Math.abs(diffH - whole);
-      var label = Math.abs(whole) + (frac ? ":30" : "") + "h";
-      pill.textContent = diffH > 0 ? "Stockholm is " + label + " ahead" : "Stockholm is " + label + " behind";
-    }
 
     renderNow(now);
   }
