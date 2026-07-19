@@ -95,8 +95,19 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .clock-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .clock-main {
+    min-width: 0;
+  }
+
   .clock {
-    font-size: clamp(2.7rem, 13vw, 3.5rem);
+    font-size: clamp(2.3rem, 11vw, 3rem);
     font-weight: 650;
     letter-spacing: -0.01em;
     line-height: 1;
@@ -112,6 +123,28 @@
     color: var(--ink-dim);
     margin-left: 0.18em;
     vertical-align: 0.55em;
+  }
+
+  .clock-secondary {
+    flex-shrink: 0;
+    text-align: right;
+    padding-bottom: 0.3em;
+  }
+
+  .secondary-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+
+  .secondary-clock {
+    font-size: 1.15rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+    white-space: nowrap;
   }
 
   .date {
@@ -248,9 +281,15 @@
     <span class="zone-abbr" id="zoneAbbr">—</span>
   </div>
 
-  <div>
-    <div class="clock" id="clock">--:--:--</div>
-    <div class="date" id="date">—</div>
+  <div class="clock-row">
+    <div class="clock-main">
+      <div class="clock" id="clock">--:--:--</div>
+      <div class="date" id="date">—</div>
+    </div>
+    <div class="clock-secondary">
+      <div class="secondary-label">Maryland</div>
+      <div class="secondary-clock" id="mdClock">--:--</div>
+    </div>
   </div>
 
   <hr class="divider" />
@@ -282,6 +321,7 @@
 
 <script>
   var STOCKHOLM_TZ = "Europe/Stockholm";
+  var MARYLAND_TZ = "America/New_York";
   var TRIP_DAYS = 11; // Jul 19 - Jul 29, 2026
 
   // Times below come straight off the tournament itinerary. Each is stored as its own
@@ -506,6 +546,10 @@
     }).format(now);
 
     document.getElementById("zoneAbbr").textContent = zoneAbbrev(now, STOCKHOLM_TZ);
+
+    document.getElementById("mdClock").textContent = new Intl.DateTimeFormat("en-US", {
+      timeZone: MARYLAND_TZ, hour: "numeric", minute: "2-digit", hour12: true
+    }).format(now);
 
     renderNow(now);
   }
