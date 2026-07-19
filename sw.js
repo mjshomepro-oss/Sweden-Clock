@@ -1,4 +1,4 @@
-const CACHE = 'sweden-clock-v1';
+const CACHE = 'sweden-clock-v2';
 const ASSETS = ['.', 'index.html', 'manifest.json', 'icon.svg'];
 
 self.addEventListener('install', e => {
@@ -13,8 +13,16 @@ self.addEventListener('activate', e => {
   self.clients.claim();
 });
 
+// Network-first: always prefer the live page (this widget is edited often),
+// falling back to cache only when offline (e.g. mid-flight, no signal).
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+    fetch(e.request)
+      .then(r => {
+        var copy = r.clone();
+        caches.open(CACHE).then(c => c.put(e.request, copy));
+        return r;
+      })
+      .catch(() => caches.match(e.request))
   );
 });
